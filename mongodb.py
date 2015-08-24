@@ -8,6 +8,8 @@
 '''
 import datetime
 import subprocess
+import os
+import sys
 # mongodb服务器信息
 mongodb_ip = "10.90.6.28"
 mongodb_port = 27017
@@ -25,6 +27,8 @@ command_dump = "/software/mongoDB/bin/mongodump -h %s:%s -d %s -o %s  > /dev/nul
     mongodb_ip, mongodb_port, mongodb_name, back_dir_tmp)
 # 打包备份文件
 command_tar = "cd %s && tar czPf %s-%s.tar.gz %s" % (back_dir_tmp, now, mongodb_name, mongodb_name)
+# 统计文件大小
+tar_dir = "%s%s-%s.tar.gz" % (back_dir_tmp, now, mongodb_name)
 # 传送tar包到最终备份目录
 command_mv = "cd %s && mv %s-%s.tar.gz %s" % (back_dir_tmp, now, mongodb_name, back_dir)
 # 删除临时备份目录
@@ -51,6 +55,8 @@ class Mongodb(object):
                 print "--------\033[32m执行临时文件的打包\033[0m--------"
                 com_tar = subprocess.Popen(command_tar, shell=True)
                 com_tar.wait()
+                tar_file_size = os.path.getsize(tar_dir) / 1024 / 1024
+                print "Mongodb的备份文件大小为：%sM"%(tar_file_size)
                 if com_tar.returncode == 0:
                     print "--------\033[32m执行最终备份 \033[0m-------"
                     com_mv = subprocess.Popen(command_mv, shell=True)
