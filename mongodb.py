@@ -33,8 +33,8 @@ command_mv = "cd %s && mv %s-%s.tar.gz %s" % (back_dir_tmp, now, mongodb_name, b
 # 删除临时备份目录
 command_rm = "rm -rf %s" % (back_dir_tmp)
 # 删除几天前的备份
-day = 1
-command_delete = "find %s -mtime +%s -delete" % (back_dir, day)
+day = 3
+command_delete = """find %s -mtime +%s -name "*.*" -exec rm -rf {} \;""" % (back_dir, day)
 
 
 class Mongodb(object):
@@ -81,7 +81,7 @@ class Mongodb(object):
             print "--------\033[31m 执行mongodb备份到临时文件目录失败 \033[0m-------"
 
     def drop(self):
-        #先获取文件个数
+        # 先获取文件个数
         for dir_path, subpaths, files in os.walk(back_dir):
             if len(files) > day:
                 print "----------------\033[32m删除%s天前备份\033[0m--------" % day
@@ -92,6 +92,6 @@ class Mongodb(object):
                     print "--------\033[31m 删除失败\033[0m --------"
 
 
-run = Mongodb(command_mk, command_dump, command_tar, command_mv, command_rm, command_delete)
-run.backup()
-run.drop()
+if __name__ == "__main__":
+    Mongodb(command_mk, command_dump, command_tar, command_mv, command_rm, command_delete).backup()
+    Mongodb(command_mk, command_dump, command_tar, command_mv, command_rm, command_delete).drop()
