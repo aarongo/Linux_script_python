@@ -44,6 +44,7 @@ class Mongodb(object):
         self.command_tar = command_tar
         self.command_mv = command_mv
         self.command_rm = command_rm
+        self.command_delete = command_delete
 
     def backup(self):
         # 创建临时目录
