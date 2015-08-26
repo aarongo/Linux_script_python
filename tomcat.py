@@ -88,7 +88,7 @@ if __name__ == "__main__":
         for index, options in enumerate(action_start):
             print index, "---->", options
         action = raw_input("Please Input Your action:")
-        # 判断用户输入操作，在类中是否存在方法
+        # 判断用户输入操作，在类中是否存在方法!!!
         if hasattr(run, action):
             operating = getattr(run, action)
             operating()
