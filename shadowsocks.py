@@ -1,22 +1,36 @@
 # _*_coding:utf-8_*_
 __author__ = 'lonnyliu'
-# For Ubuntu Shadowsocks(ubuntu 代理方式的脚本)
-
-import subprocess
+import pexpect
 
 
-class Shadowsocks(object):
-    def __init__(self, command):
+class AutoPassword(object):
+    def __init__(self, command, passd):
         self.command = command
-    def run(self):
-        print "--------后台启动shadowsocks--------"
-        com_start = subprocess.Popen(self.command,shell=True)
-        com_start.wait()
-        if com_start.returncode == 0:
-            print "--------Running Shadowsocks suecessful--------"
-        else:
-            print "--------Running Shadowsocks Fail--------"
+        self.passd = passd
+
+    def start(self):
+        print "\033[32mRunning ....................\033[0m"
+        # --------执行Linux 系统命令--------
+        child = pexpect.spawn(self.command)
+        # --------探测屏幕输出信息--------
+        child.expect("password for yulong:")
+        # "-------发送密码-------"
+        child.sendline(self.passd)
+        # "-------收集结果-------"
+        child.expect(pexpect.EOF)
+        print "-------------------------\033[32m结果为 \033[0m-------------------------",child.before
+
+
 if __name__ == "__main__":
-    command = "/software/python2.7.10/bin/sslocal -c /software/python2.7.10/shadowsocks.json -d start"
-    shawdowsocks_run = Shadowsocks()
-    shawdowsocks_run.run()
+    while True:
+        password = "aarongo"
+        # 执行单个命令时可以写死
+        # com = "sudo /home/yulong/.pyenv/versions/2.7.10/bin/python2.7 /home/yulong/.pyenv/versions/2.7.10/bin/sslocal -c /etc/shadowsocks.json -d start"
+
+        # 执行多条命令 与while Ture 结合
+        com = "sudo" + " " + str(raw_input("Please Input Commands:"))
+        run = AutoPassword(com, password)
+        run.start()
+        if com.endswith("quit"):
+            print "--------\033[31m退出该SHELL \033[0m--------"
+            break
