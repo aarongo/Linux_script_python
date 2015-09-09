@@ -6,22 +6,6 @@ import paramiko
 import interactive
 import server_group
 
-server_ip = {
-    "carrefour_test": {
-        "backen_ip": ['172.31.1.100', '172.31.1.200'],
-        "Front_ip": ['172.31.1.101', '172.31.1.201'],
-        "Release_ip": ['172.31.1.160'],
-        "Solr_ip": ['172.31.1.155'],
-        "Memcached_ip": ['172.31.1.105', '172.31.1.102']
-    },
-    "B2B2C_Test": {
-        "Backen_IP": ['10.90.6.27', '10.90.6.31'],
-        "Front_IP": ['10.90.6.25', '10.90.6.26'],
-        "Solr_IP": ['10.90.6.28', '10.90.6.29', '10.90.6.30'],
-        "Images_ip": ['10.90.6.32']
-    }
-}
-
 
 class Action(object):
     def choseIP(self):
@@ -39,7 +23,7 @@ class Action(object):
         # 遍历选择出来的环境列表
         for index, value in enumerate(tmp_milieu):
             print index, value
-        chose_milieu = raw_input("选择你要操作的环境:")
+        chose_milieu = raw_input("\033[32m选择你要操作的环境:\033[0m")
         # 选择环境下的服务器组
         if chose_milieu.isdigit():
             chose_milieu = int(chose_milieu)
@@ -49,7 +33,7 @@ class Action(object):
         # 遍历服务器组
         for index, value in enumerate(tmp_server):
             print index, value
-        chose_server = raw_input("选择你要操作的服务器组:")
+        chose_server = raw_input("\033[32m选择你要操作的服务器组:\033[0m")
         if chose_server.isdigit():
             chose_server = int(chose_server)
             # 遍历服务器组，将组内主机添加到tmp_server_ip列表中
@@ -58,7 +42,7 @@ class Action(object):
         # 遍历tmp_server_ip列表，将ip获取出来
         for index, value in enumerate(tmp_server_ip):
             print index, value
-        chose_ip = raw_input("选择你要操作的IP:")
+        chose_ip = raw_input("\033[32m选择你要操作的IP:\033[0m")
         if chose_ip.isdigit():
             chose_ip = int(chose_ip)
             ip = tmp_server_ip[chose_ip]
@@ -78,10 +62,10 @@ class Action(object):
                 child.expect('password:')
                 child.sendline(password)
             elif index == 3:
-                print "链接超时！！"
+                print "\033[31m 链接超时！！\033[0m"
             # 发送命令到远程
             child.sendline(command)
-            print "-------------------结果为------------------", child.read()
+            print "-------------------\033[32m 结果为 \033[0m------------------", child.read()
         except pexpect.EOF, err:
             print "EOF-------->", err
         except pexpect.TIMEOUT, err:
@@ -112,9 +96,9 @@ class Action(object):
 
 if __name__ == "__main__":
     while True:
-        way = raw_input("请输入的方式：").strip()
+        way = raw_input("\033[35m 请输入的方式：\033[0m").strip()
         if way == 'command':
-            print "执行一条命令的方式"
+            print "\033[32m---------------Command SHell Only---------------\033[0m"
             try:
                 run = Action()
                 ip = run.choseIP()
@@ -123,9 +107,9 @@ if __name__ == "__main__":
                 pwd = getpass.getpass(prompt='输入密码: ')
                 run.ssh_command(user, pwd, ip, command)
             except IndexError, err:
-                print "你选择的环境/服务器组/主机不存在"
+                print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
         elif way == 'ssh':
-            print "登录到服务器的方式"
+            print "\033[32m---------------SSH To Server---------------\033[0m"
             try:
                 run = Action()
                 ip = run.choseIP()
@@ -133,9 +117,9 @@ if __name__ == "__main__":
                 pwd = getpass.getpass(prompt='输入密码: ')
                 run.connection(ip, user, pwd)
             except IndexError, err:
-                print "你选择的环境/服务器组/主机不存在"
+                print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
         elif way == 'quit':
-            print "----------退出----------"
+            print "----------\033[31m 退出 \033[0m----------"
             break
         else:
-            print "--------------------输入的操作方式错误重新输入--------------------"
+            print "--------------------\033[31m 输入的操作方式错误重新输入\033[0m--------------------"
