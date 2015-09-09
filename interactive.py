@@ -2,6 +2,7 @@
 import socket
 import sys
 from paramiko.py3compat import u
+import time
 
 # windows does not have termios...
 try:
@@ -13,29 +14,32 @@ except ImportError:
     has_termios = False
 
 
-def interactive_shell(chan):
+def interactive_shell(chan, usr, ip):
     if has_termios:
-        posix_shell(chan)
+        posix_shell(chan, usr, ip)
     else:
         windows_shell(chan)
 
 
-def posix_shell(chan):
+def posix_shell(chan, user, ip):
     import select
 
     oldtty = termios.tcgetattr(sys.stdin)
+    f = file('record.txt','ab+')
     try:
         tty.setraw(sys.stdin.fileno())
         tty.setcbreak(sys.stdin.fileno())
         chan.settimeout(0.0)
-
+        records = []
+        cmd = ''
+        log_file = file("audit_log_%s.log" % time.strftime("%Y_%m_%d %H:%M"), "w")
         while True:
             r, w, e = select.select([chan, sys.stdin], [], [])
             if chan in r:
                 try:
                     x = u(chan.recv(1024))
                     if len(x) == 0:
-                        sys.stdout.write('\r\n**×\033[31m退出当前服务器 \033[0m***\r\n')
+                        sys.stdout.write('\r\n***********\033[31m退出当前服务器 \033[0m***********\r\n')
                         break
                     sys.stdout.write(x)
                     sys.stdout.flush()
@@ -43,12 +47,23 @@ def posix_shell(chan):
                     pass
             if sys.stdin in r:
                 x = sys.stdin.read(1)
+                cmd += x
+                records.append(x)
+                if x == '\r':
+                    print "your input is:",cmd
+                    log_line = """%s\t\t%s\t\t%s %s\r""" % (user, ip, time.strftime('%Y-%m-%d %H:%M:%S'),cmd)
+                    cmd = ''
+                    log_file.write(log_line)
+
                 if len(x) == 0:
                     break
                 chan.send(x)
+        else:
+            log_file.close()
 
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+        f.close()
 
 
 # thanks to Mike Looijmans for this code
