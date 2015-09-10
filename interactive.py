@@ -25,14 +25,13 @@ def posix_shell(chan, user, ip):
     import select
 
     oldtty = termios.tcgetattr(sys.stdin)
-    f = file('record.txt','ab+')
     try:
         tty.setraw(sys.stdin.fileno())
         tty.setcbreak(sys.stdin.fileno())
         chan.settimeout(0.0)
-        records = []
+        cmd_list = []
         cmd = ''
-        log_file = file("audit_log_%s.log" % time.strftime("%Y_%m_%d %H:%M"), "w")
+        f = file("audit_%s.log" % time.strftime("%Y_%m_%d %H:%M"), 'wb')
         while True:
             r, w, e = select.select([chan, sys.stdin], [], [])
             if chan in r:
@@ -47,19 +46,20 @@ def posix_shell(chan, user, ip):
                     pass
             if sys.stdin in r:
                 x = sys.stdin.read(1)
-                cmd += x
-                records.append(x)
-                if x == '\r':
-                    print "your input is:",cmd
-                    log_line = """%s\t\t%s\t\t%s %s\r""" % (user, ip, time.strftime('%Y-%m-%d %H:%M:%S'),cmd)
-                    cmd = ''
-                    log_file.write(log_line)
-
                 if len(x) == 0:
                     break
+                if not x == '\r':
+                    cmd += x
+                else:
+                    cmd_format = "%s\t%s\t%s\t%s\n" % (user, ip, time.strftime("%Y-%m-%d %H:%M:%S"), cmd)
+                    cmd_list.append(cmd)
+                    cmd_format_tuple = (user, ip, cmd, time.strftime("%Y-%m-%d %H:%M:%S"))
+                    f.write(cmd_format)
+                    #cmd_list.append(cmd_format_tuple)
+                    cmd = ''
                 chan.send(x)
-        else:
-            log_file.close()
+        f.close()
+        print cmd_list
 
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)

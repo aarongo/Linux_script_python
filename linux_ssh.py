@@ -5,6 +5,8 @@ import getpass
 import paramiko
 import interactive
 import server_group
+import ConfigParser
+import os, time
 
 
 class Action(object):
@@ -106,46 +108,96 @@ class Action(object):
         channel.close()
         ssh.close()
 
-    def chose_user(self):
-        user_group = []
-        competence = []
-        for key in server_group.server_user:
-            user_group.append(key)
-        for index, value in enumerate(user_group):
-            print index, value
-        chose_group = raw_input("选择你要操作的环境：")
-        if chose_group.isdigit():
-            chose_group = int(chose_group)
-        for key in server_group.server_user.get(user_group[chose_group]):
-            competence.append(key)
-        for index, value in enumerate(competence):
-            print index, value
-        chose_competence = raw_input("选择你要以什么身份进行登录：")
-        if chose_competence.isdigit():
-            chose_competence = int(chose_competence)
-            user = server_group.server_user.get(user_group[chose_group]).get(competence[chose_competence]).get("user")
-            password = server_group.server_user.get(user_group[chose_group]).get(competence[chose_competence]).get(
-                "password")
-            info = user, password
-        return info
+    def get_files(self, user, password, ip, port=22):
+        print """
+                ****************************************
+                            批量传送文件
+                   会将远程主机目录下所有文件传送到
+                   本机目录下
 
-    def put(self):
-        pass
+                   如：scp /datadb/* user@hostname:/root/test/
+                ××××××××××××××××××××××××××××××××××××××××
+              """
+        default_remote_path = "/root/test/"
+        default_local_path = "/datadb/"
+        remote_path = raw_input("请输入远程目录(默认为:/root/test/):").strip()
+        if len(remote_path) == 0:
+            remote_path = default_remote_path
+        local_path = raw_input("请输入本机目录（默认为:/datadb/ 下载到本机的目录)").strip()
+        if len(local_path) == 0:
+            local_path = default_local_path
+        t = paramiko.Transport((ip, port))
+        t.connect(username=user, password=password)
+        sftp = paramiko.SFTPClient.from_transport(t)
+        files = sftp.listdir(remote_path)
+        try:
+            for f in files:
+                print ''
+                print "############################################"
+                print "开始从%s下载文件 %s" % (ip, time.strftime("%Y-%m-%d %H:%M:%S"))
+                print "下载文件：", os.path.join(remote_path, f)
+                sftp.get(os.path.join(remote_path, f), os.path.join(local_path, f))
+                print "成功下载文件 %s" % time.strftime("%Y-%m-%d %H:%M:%S")
+                print "############################################"
+        except IOError, err:
+            print "有目录存在", err
+        t.close()
 
-    def get(self):
+    def put_files(self, user, password, ip, port=22):
+        print """
+                ****************************************
+                            批量传送文件
+                   会将本机目录下的所有文件传送到
+                   远程主机目录下
+                   如：scp /datadb/* user@hostname:/root/test/
+                ××××××××××××××××××××××××××××××××××××××××
+              """
+        default_remote_path = "/root/test/"
+        default_local_path = "/datadb/"
+        remote_path = raw_input("请输入远程目录(默认为:/root/test/):").strip()
+        if len(remote_path) == 0:
+            remote_path = default_remote_path
+        local_path = raw_input("请输入本机目录（默认为:/datadb/ 下载到本机的目录)").strip()
+        if len(local_path) == 0:
+            local_path = default_local_path
+        t = paramiko.Transport((ip, port))
+        t.connect(username=user, password=password)
+        sftp = paramiko.SFTPClient.from_transport(t)
+        files = os.listdir(local_path)
+        try:
+            for f in files:
+                print ''
+                print '#########################################'
+                print '开始上传文件 %s ' % time.strftime("%Y-%m-%d %H:%M:%S")
+                print '正在上传文件:', os.path.join(local_path, f)
+
+                sftp.put(os.path.join(local_path, f), os.path.join(remote_path, f))
+
+                print '开始上传文件 %s ' % time.strftime("%Y-%m-%d %H:%M:%S")
+
+                print '上传文件成功 %s ' % time.strftime("%Y-%m-%d %H:%M:%S")
+                print ''
+                print '##########################################'
+        except IOError, err:
+            print "有目录存在", err
+        t.close()
+
+    def send_group(self):
         pass
 
 
 if __name__ == "__main__":
     while True:
         print """
-            \033[31m运行方式分为两种：
-                ssh:----->直接登录到服务器进行操作
-                command:----->执行单次命令获取到结果\033[0m
+            \033[31m运行方式分为4种：
+                ssh:==========直接登录到服务器进行操作
+            command:==========执行单次命令获取到结果
+                get:==========下载文件到本机
+                put:==========上传文件到远程\033[0m
         """
         way = raw_input("\033[35m 请输入的方式：\033[0m").strip()
         if way == 'command':
-            print "\033[32m---------------Command SHell Only---------------\033[0m"
+            print "\033[32m---------------执行一条命令方式---------------\033[0m"
             try:
                 run = Action()
                 ip = run.choseIP()
@@ -155,8 +207,10 @@ if __name__ == "__main__":
                 run.ssh_command(user, pwd, ip, command)
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
+
+
         elif way == 'ssh':
-            print "\033[32m---------------SSH To Server---------------\033[0m"
+            print "\033[32m---------------连接到服务器方式---------------\033[0m"
             try:
                 run = Action()
                 ip = run.choseIP()
@@ -165,6 +219,31 @@ if __name__ == "__main__":
                 run.connection(ip, user, pwd)
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
+
+
+        elif way == 'get':
+            print "\033[32m---------------下载远程文件到本机---------------\033[0m"
+            try:
+                run = Action()
+                ip = run.choseIP()
+                user = raw_input("输入用户名：").strip()
+                pwd = getpass.getpass(prompt='输入密码: ')
+                run.get_files(user, pwd, ip)
+            except IndexError, err:
+                print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
+
+
+        elif way == 'put':
+            print "\033[32m---------------上传文件到远程---------------\033[0m"
+            try:
+                run = Action()
+                ip = run.choseIP()
+                user = raw_input("输入用户名：").strip()
+                pwd = getpass.getpass(prompt='输入密码: ')
+                run.put_files(user, pwd, ip)
+            except IndexError, err:
+                print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
+
         elif way == 'quit':
             print "----------\033[31m 退出 \033[0m----------"
             break
