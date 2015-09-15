@@ -3,6 +3,7 @@ import socket
 import sys
 from paramiko.py3compat import u
 import time
+import mysql_base
 
 # windows does not have termios...
 try:
@@ -29,9 +30,9 @@ def posix_shell(chan, user, ip):
         tty.setraw(sys.stdin.fileno())
         tty.setcbreak(sys.stdin.fileno())
         chan.settimeout(0.0)
-        cmd_list = []
+        # cmd_list = []
         cmd = ''
-        f = file("audit_%s.log" % time.strftime("%Y_%m_%d %H:%M"), 'wb')
+        # f = file("audit_%s.log" % time.strftime("%Y_%m_%d %H:%M"), 'wb')
         while True:
             r, w, e = select.select([chan, sys.stdin], [], [])
             if chan in r:
@@ -51,19 +52,22 @@ def posix_shell(chan, user, ip):
                 if not x == '\r':
                     cmd += x
                 else:
-                    cmd_format = "%s\t%s\t%s\t%s\n" % (user, ip, time.strftime("%Y-%m-%d %H:%M:%S"), cmd)
-                    cmd_list.append(cmd)
+                    # cmd_format = "%s\t%s\t%s\t%s\n" % (user, ip, time.strftime("%Y-%m-%d %H:%M:%S"), cmd)
+                    # log_sql = "INSERT INTO action_logs(login_ip,host_user,time_now,logs) VALUES('%s','%s','%s','%s')" % (
+                    #     ip, user, time.strftime("%Y-%m-%d %H:%M:%S"), cmd)
+                    insert = mysql_base.DB()
+                    log_sql = "INSERT INTO action_logs(login_ip,host_user,time_nows,logs)VALUES('%s','%s','%s','%s')" % (
+                        ip, user, time.strftime("%Y-%m-%d %H:%M:%S"), cmd)
+                    insert.inster(log_sql)
+                    # cmd_list.append(cmd)
                     cmd_format_tuple = (user, ip, cmd, time.strftime("%Y-%m-%d %H:%M:%S"))
-                    f.write(cmd_format)
-                    #cmd_list.append(cmd_format_tuple)
+                    # f.write(cmd_format)
+                    # cmd_list.append(cmd_format_tuple)
                     cmd = ''
                 chan.send(x)
-        f.close()
-        print cmd_list
 
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-        f.close()
 
 
 # thanks to Mike Looijmans for this code

@@ -5,6 +5,7 @@ import paramiko
 import interactive
 import server_group
 import os, time
+import mysql_base
 
 
 class Action(object):
@@ -61,7 +62,8 @@ class Action(object):
                 break
             else:
                 print "\033[32m--------------------请输入以下所显示IP----------------------\033[0m"
-    #获取服务器组ipList
+
+    # 获取服务器组ipList
     def receive_groupip(self):
         print "\033[32m--------获取服务器组ip---List--------\033[0m"
         # 定义存在取到的变量值的空列表
@@ -85,31 +87,43 @@ class Action(object):
             groups_ip.append(value)
         return groups_ip
 
-    # 获取主机用户和密码
+    # 获取数据库用户名和密码
     def getuser(self):
-        print "\033[32m--------选择你要操作的用户--------\033[0m"
-        # 选择出来的环境列表
-        tmp_milieu = []
-        global user, password
-        user = None
-        password = None
-        # 获取字典中的环境可以添加到环境列表
-        for key in server_group.server_ip:
-            tmp_milieu.append(key)
-        for index, value in enumerate(tmp_milieu):
+        # 实例化mysql连接类
+        query = mysql_base.DB()
+        # 临时存放环境列表
+        milieu_list = []
+        # 临时存放用户列表
+        user_list = []
+        # 返回用户密码信息
+        user_info = None
+        # 获取数据库环境添加临时环境列表
+        milieu_sql = "select milieu from milieu_group"
+        for i in query.query(milieu_sql):
+            milieu_list.append(i[0])
+        for index, value in enumerate(milieu_list):
             print index, value
-        chose_milieu = raw_input("获取环境的用户名:")
+        chose_milieu = raw_input("选择操作用户的环境组：")
         if chose_milieu.isdigit():
             chose_milieu = int(chose_milieu)
-            # 直接获取user字段
-            user_info = server_group.server_ip.get(tmp_milieu[chose_milieu]).get('user')
-            for index, value in enumerate(user_info):
-                print index, value[0]
-            chsoe_user = raw_input("选择登录用户:")
-            if chsoe_user.isdigit():
-                chsoe_user = int(chsoe_user)
-                user = user_info[chsoe_user][0]
-                password = user_info[chsoe_user][1]
+            # 获取用户列表
+        user_sql = "select  t.name from user_info t,milieu_group d where d.id=t.milieu_id and d.milieu='%s'" % \
+                   milieu_list[chose_milieu]
+        for i in query.query(user_sql):
+            user_list.append(i[0])
+        for index, value in enumerate(user_list):
+            print index, value
+        chose_user = raw_input("选择环境组内用户:")
+        if chose_user.isdigit():
+            chose_user = int(chose_user)
+            # 获取选择用户的密码
+            password_sql = "select  t.password from user_info t,milieu_group d where d.id=t.milieu_id and d.milieu='%s' and t.name='%s'" % (
+                milieu_list[chose_milieu], user_list[chose_user])
+            for i in query.query(password_sql):
+                # 获取用户和密码存放到用户信息中
+                user_info = user_list[chose_user], i[0]
+        # 方法返回用户密码信息
+        return user_info
 
     # 执行单条命令在远程服务器上
     def ssh_command(self, user, password, hostip, command):
@@ -280,9 +294,9 @@ if __name__ == "__main__":
             try:
                 run = Action()
                 ip = run.receive_ip()
-                run.getuser()
+                info = run.getuser()
                 command = raw_input("输入要执行的命令：").strip()
-                run.ssh_command(user, password, ip, command)
+                run.ssh_command(info[0], info[1], ip, command)
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
 
@@ -291,8 +305,8 @@ if __name__ == "__main__":
             try:
                 run = Action()
                 ip = run.receive_ip()
-                run.getuser()
-                run.connection(ip, user, password)
+                info = run.getuser()
+                run.connection(ip, info[0], info[1])
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
 
@@ -301,8 +315,8 @@ if __name__ == "__main__":
             try:
                 run = Action()
                 ip = run.receive_ip()
-                run.getuser()
-                run.get_files(user, password, ip)
+                info = run.getuser()
+                run.get_files(info[0], info[1], ip)
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
 
@@ -311,17 +325,17 @@ if __name__ == "__main__":
             try:
                 run = Action()
                 ip = run.receive_ip()
-                run.getuser()
-                run.put_files(user, password, ip)
+                info = run.getuser()
+                run.put_files(info[0], info[1], ip)
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
         elif way == 'send':
             print "\033[32m---------------发送文件到多个服务器---------------\033[0m"
             try:
                 run = Action()
-                run.getuser()
+                info = run.getuser()
                 ip_groups = run.receive_groupip()
-                run.send_group(user, ip_groups, password)
+                run.send_group(info[0], ip_groups, info[1])
             except IndexError, err:
                 print "\033[31m你选择的环境/服务器组/主机不存在\033[0m"
 
