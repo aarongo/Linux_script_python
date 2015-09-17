@@ -45,10 +45,13 @@ class Nginx(object):
         for line in outs_pid.stdout.readlines():
             run_pid.append(line.strip())
         # 进行判断文件中的Pid是否存在与正在运行的pid中
-        if files_pid[0] in run_pid:
-            print "\033[32m----------Staring Nginx Successful----------\033[0m"
-        else:
-            print "\033[31m----------Staring Nginx Failed----------\033[0m"
+        try:
+            if files_pid[0] in run_pid:
+                print "\033[32m----------Staring Nginx Successful----------\033[0m"
+            else:
+                print "\033[31m----------Staring Nginx Failed----------\033[0m"
+        except IndexError:
+            print "\033[31m----------The Server Is Not Exist----------\033[0m"
 
     # 平滑重启Ningx
     def reload_nginx(self):
@@ -95,7 +98,7 @@ class Nginx(object):
         command = "%s %s %s" % (self.conf.get('global', 'nginx_bin_home'), self.conf.get('global', 'nginx_config_test'),
                                 self.conf.get('global', 'nginx_config'))
         print "\033[32m########################检测结果为########################\033[0m"
-        subprocess.Popen(command, shell=True)
+        subprocess.call(command, shell=True)
         print "\033[32m#########################################################\033[0m"
 
     # 查看Ningx所有信息
