@@ -116,9 +116,9 @@ if __name__ == "__main__":
          start:启动Nginx服务
         reload:平滑重启Nginx服务（重新读取配置文件）
           stop:停止Nginx服务（处理完当前的请求后关闭Ningx）
-     fast_stop:×快速停止Nginx服务（不保存相关信息）
+          kill:×快速停止Nginx服务（不保存相关信息）
       v_config:显示Nginx配置文件
-        t_test:测试Nginx配置文件
+          test:测试Nginx配置文件
              -V:显示Nginx的所有信息\033[0m
         """
     run = Nginx()
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         run.fast_stop_nginx()
     elif sys.argv[1] == 'v_config':
         run.view_nginx_conf()
-    elif sys.argv[1] == 't_tset':
+    elif sys.argv[1] == 'test':
         run.check_nginx_conf()
     elif sys.argv[1] == '-V':
         run.check_nginx_info()
