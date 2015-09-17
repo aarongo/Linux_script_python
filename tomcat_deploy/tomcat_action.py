@@ -10,7 +10,7 @@ import time, sys
 
 class Action_Tomcat(object):
     def status(self):
-        req = urllib2.Request('http://192.168.1.200:8080/index.html')
+        req = urllib2.Request('http://10.90.10.200:8080/index.html')
         # 记录访问重试次数
         request_num = 0
         while True:
@@ -43,25 +43,24 @@ class Action_Tomcat(object):
         return int(pid)
 
     def start(self):
-        tomcat_home = "/software/tomcat-python/"
         tomcat_bin_home = "/software/tomcat-python/bin/"
         tomcat_start_script = "startup.sh"
         command = "%s%s" % (tomcat_bin_home, tomcat_start_script)
         start_tomcat = subprocess.Popen(command, shell=True)
         start_tomcat.wait()
         if start_tomcat.returncode == 0:
-            print "\033[32m ##########Tomcat Start successful########## \033[0m"
+            print "\033[32m##########Tomcat Start successful##########\033[0m"
         else:
-            print "\033[31m ##########Tomcat Start Failed##########\033[0m"
+            print "\033[31m##########Tomcat Start Failed##########\033[0m"
 
     def stop(self):
         kill_pid_command = "kill -9 %s" % (self.get_pid())
         run_command = subprocess.Popen(kill_pid_command, shell=True)
         run_command.wait()
         if run_command.returncode == 0:
-            print "\033[32m #######kill Tomcat process successsful#######\033[0m"
+            print "\033[32m#######kill Tomcat process successsful#######\033[0m"
         else:
-            print "\033[31m #######Kill TOmcat process Failed#######\033[0m"
+            print "\033[31m#######Kill TOmcat process Failed#######\033[0m"
 
     def restart(self):
         self.stop()
@@ -76,16 +75,14 @@ class Action_Tomcat(object):
 
 
 if __name__ == "__main__":
-    action_list = ('start', 'stop', 'restart', 'status')
-    help_info = """
+    action_list = ('start', 'stop', 'restart', 'status', '--help')
+    help_info = """\033[32m
                 ----Process help----
             %s: Start Tomcat service
             %s: Stop Tomcat service
             %s: Restart Tomcat service
-            %s: Tomcat Service Status
+            %s: Tomcat Service Status \033[0m
     """ % (action_list[0], action_list[1], action_list[2], action_list[3])
-    print help_info
-    print "--------------------The divider-------------------"
     run = Action_Tomcat()
     try:
         if sys.argv[1] == action_list[0]:
@@ -96,6 +93,9 @@ if __name__ == "__main__":
             run.restart()
         elif sys.argv[1] == action_list[3]:
             run.status()
+        elif sys.argv[1] == action_list[4]:
+            print help_info
+            print "--------------------The divider-------------------"
         else:
             print "Parameter error！！！！"
     except IndexError, err:
