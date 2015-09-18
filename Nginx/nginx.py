@@ -3,7 +3,8 @@
 # __author__ = 'yulong'
 # Good memory than rotten written
 import subprocess
-import sys, os
+import sys
+import os
 import ConfigParser
 
 
@@ -146,29 +147,32 @@ if __name__ == "__main__":
         reload:平滑重启Nginx服务（重新读取配置文件）
           stop:停止Nginx服务（处理完当前的请求后关闭Ningx）
           kill:×快速停止Nginx服务（不保存相关信息）
-      v_config:显示Nginx配置文件
+        config:显示Nginx配置文件
           test:测试Nginx配置文件
              -V:显示Nginx的所有信息
          access:统计访问日志的ip\033[0m
         """
     run = Nginx()
-    if sys.argv[1] == 'ps':
-        run.check_nginx_process()
-    elif sys.argv[1] == 'start':
-        run.start_nginx()
-    elif sys.argv[1] == 'reload':
-        run.reload_nginx()
-    elif sys.argv[1] == 'stop':
-        run.stop_nginx()
-    elif sys.argv[1] == 'kill':
-        run.fast_stop_nginx()
-    elif sys.argv[1] == 'v_config':
-        run.view_nginx_conf()
-    elif sys.argv[1] == 'test':
-        run.check_nginx_conf()
-    elif sys.argv[1] == '-V':
-        run.check_nginx_info()
-    elif sys.argv[1] == 'access':
-        run.nginx_accessnum()
-    elif sys.argv[1] == '--help':
+    try:
+        if sys.argv[1] == 'ps':
+            run.check_nginx_process()
+        elif sys.argv[1] == 'start':
+            run.start_nginx()
+        elif sys.argv[1] == 'reload':
+            run.reload_nginx()
+        elif sys.argv[1] == 'stop':
+            run.stop_nginx()
+        elif sys.argv[1] == 'kill':
+            run.fast_stop_nginx()
+        elif sys.argv[1] == 'config':
+            run.view_nginx_conf()
+        elif sys.argv[1] == 'test':
+            run.check_nginx_conf()
+        elif sys.argv[1] == '-V':
+            run.check_nginx_info()
+        elif sys.argv[1] == 'access':
+            run.nginx_accessnum()
+        elif sys.argv[1] == '--help':
+            print help_com
+    except IndexError:
         print help_com
