@@ -2,7 +2,8 @@
 # _*_coding:utf-8_*_
 # __author__ = 'yulong'
 # Good memory than rotten written
-import subprocess, sys
+import subprocess
+import sys, os
 import ConfigParser
 
 
@@ -108,6 +109,34 @@ class Nginx(object):
         print "\033[32m########################Nginx Info########################\033[0m"
         subprocess.call(command, shell=True)
         print "\033[32m##########################################################\033[0m"
+        # ip地址列表
+
+    # 统计Nginx日志内的访问IP
+    def nginx_accessnum(self):
+        dir = "%s" % self.conf.get('global', 'Nginx_logs_path')
+        files = os.listdir(dir)
+        print "\033[32m*******************日志目录下的文件内容为*******************\033[0m"
+        for f in files:
+            print dir + os.sep + f
+        # ip地址列表
+        ip_list = []
+        log_pat = raw_input("Please Input Logs Path:").strip()
+        command_num = "cat %s  | awk '{print $1,$6}' > list.txt" % log_pat
+        command = subprocess.Popen(command_num, shell=True)
+        command.wait()
+        f = file("list.txt", "r")
+        for line in f.readlines():
+            ip_list.append(line.strip())
+        print "\033[31m Nginx总的访问次数为：\033[0m", len(ip_list), "\n"
+        # 首先遍历set集合，以遍历到的元素为值传给统计列表函数
+        # 首先转换ip_list类型
+        ip_set = set(ip_list)
+        access_max = int(raw_input("请输入你过滤的访问次数："))
+        print "\033[32m超过 %s 次访问的IP \033[0m --------\033[32m 访问次服务器的次数为：\033[0m" % access_max
+        for item in ip_set:
+            if ip_list.count(item) > access_max:
+                print item, "--------------------", ip_list.count(item)
+        f.close()
 
 
 if __name__ == "__main__":
@@ -119,7 +148,8 @@ if __name__ == "__main__":
           kill:×快速停止Nginx服务（不保存相关信息）
       v_config:显示Nginx配置文件
           test:测试Nginx配置文件
-             -V:显示Nginx的所有信息\033[0m
+             -V:显示Nginx的所有信息
+         access:统计访问日志的ip\033[0m
         """
     run = Nginx()
     if sys.argv[1] == 'ps':
@@ -138,5 +168,7 @@ if __name__ == "__main__":
         run.check_nginx_conf()
     elif sys.argv[1] == '-V':
         run.check_nginx_info()
+    elif sys.argv[1] == 'access':
+        run.nginx_accessnum()
     elif sys.argv[1] == '--help':
         print help_com
