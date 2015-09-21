@@ -12,17 +12,17 @@ import pexpect
 
 class Mysql_Backup(object):
     now = datetime.datetime.now().strftime("%Y-%m-%d-%H")
-    delete_day_ago = 5
-    db_host = "localhost"
-    db_user = 'root'
-    db_password = 'comall2014'
-    db_name = "cybershop_test"
-    mysqldump_bin_home = "/usr/bin/mysqldump"
-    local_backup_dir = "/software/mysql_back"
-    remote_user = 'root'
-    remote_password = 'comall2014'
-    remote_host = '172.31.1.160'
-    remote_backup_dir = "/install/backup/mysql_backup"
+    delete_day_ago = 5  # 定义保留天数
+    db_host = "localhost"  # mysql 主机地址
+    db_user = 'user'  # mysql用户
+    db_password = 'password'  # mysql密码
+    db_name = "cybershop_test"  # mysql数据库名称
+    mysqldump_bin_home = "/usr/bin/mysqldump"  # mysqldump目录
+    local_backup_dir = "/software/mysql_back"  # 本地存放备份路径
+    remote_user = 'user'  # 远程主机用户名
+    remote_password = 'password'  # 远程主机密码
+    remote_host = 'x.x.x.x'  # 远程主机IP
+    remote_backup_dir = "/install/backup/mysql_backup"  # 远程主机备份路径
     command = "%s -u%s -p%s --host=%s %s > %s/%s-%s.sql" % (
         mysqldump_bin_home, db_user, db_password, db_host, db_name, local_backup_dir, db_name, now)
 
@@ -60,7 +60,7 @@ class Mysql_Backup(object):
             当命令成功时返回的状态码为0,当Linux exitcode 不是0的时候 exitstatus返回不等于0,即可判断远程文件是否传送成功
         '''
         command_output, exitstatus = pexpect.run(remote_command,
-                                                 events={'(?i)password': 'comall2014\n'}, withexitstatus=1)
+                                                 events={'(?i)password': 'password\n'}, withexitstatus=1)
         if exitstatus == 0:
             command_rm = "rm -rf %s/*" % self.local_backup_dir
             print "\033[32m**********Delete LocalHost Files**********\033[0m"
@@ -75,7 +75,7 @@ class Mysql_Backup(object):
             self.remote_user, self.remote_host,
             self.remote_backup_dir, self.delete_day_ago)
         command_output, exitstatus = pexpect.run(command,
-                                                 events={'(?i)password': 'comall2014\n'}, withexitstatus=1)
+                                                 events={'(?i)password': 'password\n'}, withexitstatus=1)
         if exitstatus != 0:
             print "\033[32m***************Delete 5 days BackFiles Failed**************\033[0m"
         else:
