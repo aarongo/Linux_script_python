@@ -1,4 +1,3 @@
-# _*_coding:utf-8_*_
 '''Author       lonnyliu
     Use Of      Linux backup file
     Time        2015-08-21
