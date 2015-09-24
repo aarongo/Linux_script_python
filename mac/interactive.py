@@ -11,7 +11,7 @@ except ImportError:
     has_termios = False
 
 
-def interactive_shell(chan):
+def interactive_shell(chan,user, ip):
     if has_termios:
         posix_shell(chan)
     else:
