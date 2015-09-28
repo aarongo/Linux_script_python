@@ -1,6 +1,6 @@
 #!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 # _*_coding:utf-8_*_
-__author__ = 'yulong'
+__author__ = 'Administrator'
 
 import paramiko
 
@@ -8,7 +8,7 @@ import interactive
 
 dic = {
     "environment1": {
-        "ip": ['172.31.1.160', '172.31.1.101', '172.31.1.100', '172.31.1.200'],
+        "ip": ['172.31.1.160', '172.31.1.101', '172.31.1.100', '172.31.1.200','192.168.1.200'],
         "user_info": ('root', 'comall2014')
     },
     "environment2": {
@@ -23,8 +23,8 @@ class itrem2(object):
     def get_remote_info(self):
         environment_tmp = []
         environment_ip = None
-        user_info = None
-        ip = None
+        user_info = ""
+        ip = ""
         for key in dic:
             environment_tmp.append(key)
         while True:
@@ -76,9 +76,9 @@ if __name__ == "__main__":
     start = itrem2()
     tmp = start.get_remote_info()
     if tmp != 0:
-        print "Ip地址为：", tmp[0]
-        print "用户为：", tmp[1][0]
-        print "密码为：", tmp[1][1]
+        # print "Ip地址为：", tmp[0]
+        # print "用户为：", tmp[1][0]
+        # print "密码为：", tmp[1][1]
         start.connection(tmp[0], tmp[1][0], tmp[1][1])
     else:
         print "\033[31m***************Get Ip And User_info Failed**************\033[0m"
