@@ -71,7 +71,7 @@ class Mysql_Backup(object):
 
     def days_delete_agos(self):
         # 执行远程命令删除备份机上的5天前的备份(保留5天的备份）此处comall2014需要更改
-        command = """ssh %s@%s "find %s -mtime +%s -name '*.sql' -exec rm -rf {} \;" """ % (
+        command = """ssh %s@%s "cd %s && find . -mtime +%s -exec rm -Rf -- {} \;" """ % (
             self.remote_user, self.remote_host,
             self.remote_backup_dir, self.delete_day_ago)
         command_output, exitstatus = pexpect.run(command,
