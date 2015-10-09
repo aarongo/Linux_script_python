@@ -56,6 +56,19 @@ class DnsHandle(object):
             subprocess.call(command_line2, shell=True)
             time.sleep(3)
 
+    def restart_dns(self):
+        # GET CONTAINER ID
+        command_line1 = "docker ps | grep sky | awk '{print $1}'"
+        d = subprocess.Popen(command_line1, shell=True, stdout=subprocess.PIPE)
+        out, err = d.communicate()
+        # 重新启动 Docker_dns
+        print "\033[32m-----------------Restart Docker DNS-----------------\033[0m"
+        for contatinerID in out.split():
+            command_line2 = "docker  restart --time=10 %s" % contatinerID
+            print "\033[32m---------------Restart contatinerId:%s--------------------\033[0m" % contatinerID
+            subprocess.call(command_line2, shell=True)
+            time.sleep(5)
+
 
 if __name__ == "__main__":
     Handle = DnsHandle()
@@ -64,5 +77,7 @@ if __name__ == "__main__":
             Handle.start_dns()
         elif sys.argv[1] == 'stop':
             Handle.stop_dns()
+        elif sys.argv[1] == 'restart':
+            Handle.restart_dns()
     except IndexError, err:
         print "\033[31m----------Please Input Parameters----------\033[0m"
