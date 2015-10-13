@@ -1,0 +1,20 @@
+脚本为安装 mysql,memcached,mongodb 实现自动化安装
+脚本执行过程
+1,选择安装的服务
+    A,如果选择 mysql,还需要选择数据库版本,以及设定 mysql root 密码
+    B,如果选择 Memcached 无须任何操作.
+    C,如果选择 Mongodb 无须任何操作
+2,软件安装包-安装路径
+    A,软件包路径 /software/packages/
+    B,----------mysql----------
+        软件安装路径:/software/mysql
+        数据存放路径:/software/data/mysql
+        配置文件路径:/etc/my.cnf
+      ----------Memcached----------
+        软件安装位置:/software/memcached
+        启动   参数:memcached -d -m 10 -u root -l 0.0.0.0 -p <port> -c 512 -P /tmp/memcached.pid
+        默认启动4个端口:11211-11214
+      ----------Mongodb----------
+        软件安装路径:/software/mongodb3
+        数据存放路径:/software/data/mongodb
+        启动配置文件:/software/mongodb3/mongodb.conf
