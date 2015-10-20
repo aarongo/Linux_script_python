@@ -143,7 +143,7 @@ class Install_Mysql(object):
         command_line2 = "ps aux | grep memcached | grep -v grep | wc -l"
         p = subprocess.Popen(command_line2, shell=True, stdout=subprocess.PIPE)
         out, err = p.communicate()
-        if out != 0:
+        if int(out) != 0:
             print "\033[32m##########The Memcached Is Stared##########\033[0m"
         else:
             for i in auto_config.memcached_prot:
@@ -164,6 +164,7 @@ class Install_Mysql(object):
                     auto_config.mongodb_name,
                     auto_config.mongodb_default_dir)
                 subprocess.call(command_line1, shell=True)
+                print "\033[32m++++++++++Mongodb Install Suceessful++++++++++\033[0m"
                 # 添加配置文件
                 if os.path.exists(auto_config.mongodb_data_dir):
                     configfile_dir = "%s/mongodb.conf" % auto_config.mongodb_default_dir
@@ -171,6 +172,7 @@ class Install_Mysql(object):
                     for config in auto_config.mongodb_config:
                         files.write(config)
                     files.close()
+                    print "\033[32m+++++++++++Mongodb.conf Added++++++++++\033[0m"
                 else:
                     os.makedirs(auto_config.mongodb_data_dir)
                     configfile_dir = "%s/mongodb.conf" % auto_config.mongodb_default_dir
@@ -178,6 +180,7 @@ class Install_Mysql(object):
                     for config in auto_config.mongodb_config:
                         files.write(config)
                     files.close()
+                    print "\033[32m+++++++++++Mongodb.conf Added++++++++++\033[0m"
             else:
                 os.makedirs(auto_config.software_dir)
                 command_line1 = "yum -y install wget tar && cd %s && wget %s && tar xzf %s && mv %s %s" % (
@@ -185,6 +188,7 @@ class Install_Mysql(object):
                     auto_config.mongodb_name,
                     auto_config.mongodb_default_dir)
                 subprocess.call(command_line1, shell=True)
+                print "\033[32m++++++++++Mongodb Install Suceessful++++++++++\033[0m"
                 # 添加配置文件
                 if os.path.exists(auto_config.mongodb_data_dir):
                     configfile_dir = "%s/mongodb.conf" % auto_config.mongodb_default_dir
@@ -192,6 +196,7 @@ class Install_Mysql(object):
                     for config in auto_config.mongodb_config:
                         files.write(config)
                     files.close()
+                    print "\033[32m+++++++++++Mongodb.conf Added++++++++++\033[0m"
                 else:
                     os.makedirs(auto_config.mongodb_data_dir)
                     configfile_dir = "%s/mongodb.conf" % auto_config.mongodb_default_dir
@@ -199,13 +204,14 @@ class Install_Mysql(object):
                     for config in auto_config.mongodb_config:
                         files.write(config)
                     files.close()
+                    print "\033[32m+++++++++++Mongodb.conf Added++++++++++\033[0m"
 
     def start_mongodb(self):
         # 判断 mongodb 服务是否启动
         command_line1 = "ps aux | grep mongodb | grep -v 'grep'| wc -l"
         p = subprocess.Popen(command_line1, shell=True, stdout=subprocess.PIPE)
         out, err = p.communicate()
-        if out != 0:
+        if int(out) != 0:
             print "\033[32m##########Mongodb Server Is Started##########\033[0m"
         else:
             # 启动 mongodb

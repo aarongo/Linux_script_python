@@ -81,9 +81,12 @@ class Mysql_Backup(object):
         else:
             print "\033[31m**************Delete 5 Days BackFiles Sucessful OR Don't Exist 5 Days BackFiles*************\033[0m"
 
+    def main(self):
+        run_start = Mysql_Backup()
+        run_start.days_delete_agos()
+        if run_start.backup() == 0:
+            run_start.send_sql_files()
+
 
 if __name__ == "__main__":
-    run_start = Mysql_Backup()
-    run_start.days_delete_agos()
-    if run_start.backup() == 0:
-        run_start.send_sql_files()
+    Mysql_Backup().main()
