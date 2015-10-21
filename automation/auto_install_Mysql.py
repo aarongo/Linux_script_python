@@ -4,10 +4,11 @@
 # dateTime:  '15/10/12'
 #   motto:  'Good memory as bad written'
 
-import auto_config
 import os
 import subprocess
 import time
+
+import auto_config
 
 
 class Install_Mysql(object):
