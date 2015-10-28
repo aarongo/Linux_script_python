@@ -52,7 +52,7 @@ class Memcached(object):
                         process.name(), process.pid, process.username())
             os.remove(self.pid_path)
         else:
-            print "\033[32m-----------Service does not exist||Starting Memcacehd----------"
+            print "\033[32m-----------Service does not exist||Starting Memcacehd----------\033[0m"
 
     def start_memcached(self):
         print "\033[32mStart Memcached.............\033[0m"

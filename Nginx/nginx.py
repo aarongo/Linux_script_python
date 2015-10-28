@@ -121,7 +121,7 @@ class Nginx(object):
             print dir + os.sep + f
         # ip地址列表
         ip_list = []
-        log_pat = raw_input("Please Input Logs Path:").strip()
+        log_pat = raw_input("Please Input Logs Path :").strip()
         command_num = "cat %s  | awk '{print $1,$6}' > list.txt" % log_pat
         command = subprocess.Popen(command_num, shell=True)
         command.wait()
