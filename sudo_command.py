@@ -25,7 +25,6 @@ if __name__ == "__main__":
     while True:
         sys_user_info = "password for" + " " + getpass.getuser()
         password = "aarongo"
-        # 执行多条命令 与while Ture 结合
         com = "sudo" + " " + str(raw_input("Please Input Commands:"))
         run = AutoPassword(sys_user_info, com, password)
         run.start()
