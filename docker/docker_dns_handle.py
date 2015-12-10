@@ -8,6 +8,7 @@
 import subprocess
 import sys
 import time
+import argparse
 
 
 # docker 启动 DNS
@@ -72,12 +73,29 @@ class DnsHandle(object):
 
 if __name__ == "__main__":
     Handle = DnsHandle()
-    try:
-        if sys.argv[1] == 'start':
-            Handle.start_dns()
-        elif sys.argv[1] == 'stop':
-            Handle.stop_dns()
-        elif sys.argv[1] == 'restart':
-            Handle.restart_dns()
-    except IndexError, err:
-        print "\033[31m----------Please Input Parameters----------\033[0m"
+    # try:
+    #     if sys.argv[1] == 'start':
+    #         Handle.start_dns()
+    #     elif sys.argv[1] == 'stop':
+    #         Handle.stop_dns()
+    #     elif sys.argv[1] == 'restart':
+    #         Handle.restart_dns()
+    # except IndexError, err:
+    #     print "\033[31m----------Please Input Parameters----------\033[0m"
+    parser = argparse.ArgumentParser(description="This is a description of %(prog)s[options]")
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
+    parser.add_argument('-start', '--start', nargs='?', default='start',help='start DockerDns')
+    parser.add_argument('-stop', '--stop', nargs='?', default='stop', help='stop DNS')
+    parser.add_argument('-restart','--restart',nargs='?',default='restart',help='Restart dockerDNS server')
+    # parser.add_argument('stop', )
+    if len(sys.argv) == 1:
+        print parser.print_help()
+    else:
+        args = parser.parse_args()
+        print "\033[31m ====>\033[0m", args
+        if args.start != 'start':
+            print "\033[32m<+++++++>\033[0m" + "start"
+        elif args.start != 'stop':
+            print "\033[32m<+++++++>\033[0m" + "stop"
+        elif args.restart != 'restart':
+            print "\033[32m------><\033[0m" + "restart"

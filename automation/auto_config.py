@@ -6,11 +6,11 @@ software_dir = "/software/packages"
 version = ['mysql-5.1.73', 'mysql-5.5.45', 'mysql-5.6.26']
 # mysql 现在 URL
 
-mysql51_d_url = "http://172.31.1.160/serverpackages/Mysql-5.5/mysql-5.1.73.tar.gz"
-mysql55_d_url = "http://172.31.1.160/serverpackages/Mysql-5.5/mysql-5.5.45.tar.gz"
-mysql56_d_url = "http://172.31.1.160/serverpackages/Mysql-5.5/mysql-5.6.26.tar.gz"
+mysql51_d_url = "http://124.200.96.150:8081/serverpackages/Mysql-5.5/mysql-5.1.73.tar.gz"
+mysql55_d_url = "http://124.200.96.150:8081/serverpackages/Mysql-5.5/mysql-5.5.45.tar.gz"
+mysql56_d_url = "http://124.200.96.150:8081/serverpackages/Mysql-5.5/mysql-5.6.26.tar.gz"
 # 准备工作
-cmake33_d_url = "http://192.168.1.234/serverpackages/Mysql-5.5/cmake-3.3.2.tar.gz"
+cmake33_d_url = "http://124.200.96.150:8081/serverpackages/Mysql-5.5/cmake-3.3.2.tar.gz"
 cmake_bin_path = "/usr/local/bin/cmake"
 cmake_name = "cmake-3.3.2"
 default_install_software = "wget tar ncurses  ncurses-devel  openssl openssl-devel zlib bison"

@@ -233,6 +233,7 @@ if __name__ == "__main__":
                 chose_server = int(chose_server)
                 if server_list[chose_server] == 'mysql':
                     start.reday_mysql()
+                    start.software_mysql()
                     break
                 elif server_list[chose_server] == 'memcached':
                     start.software_memcached()
