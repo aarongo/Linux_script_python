@@ -15,7 +15,7 @@ class Packages(object):
         self.SVN_Checked_Directory = "/install/online/"
         self.Project_Directory_F = "%scybershop-front/target" % self.SVN_Checked_Directory
         self.Project_Directory_B = "%scybershop-web/target" % self.SVN_Checked_Directory
-        self.Upload_Directory = "/software/backwar/"
+        self.Upload_Directory = "/var/www/html/"
         self.Project_Directory_F_Name = "cybershop-front-0.0.1-SNAPSHOT.war"
         self.Project_Directory_B_Name = "cybershop-web-0.0.1-SNAPSHOT.war"
         self.density_name = ['pro', 'demo', 'ptest']
@@ -135,6 +135,7 @@ class Packages(object):
             out_files.close()
             fileHandle = open('path_list.txt')
             for line in fileHandle.readlines():
+                print "\033[31mRemove Target\033[0m", line
                 shutil.rmtree(line.strip('\n'))
             fileHandle.close()
             os.remove("path_list.txt")
