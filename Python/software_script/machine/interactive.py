@@ -1,8 +1,10 @@
 # _*_coding:utf-8_*_
 import socket
 import sys
-from paramiko.py3compat import u
 import time
+
+from paramiko.py3compat import u
+
 import mysql_base
 
 # windows does not have termios...

@@ -1,11 +1,14 @@
 # _*_coding:utf-8_*_
 __author__ = 'yulong'
-import pexpect
+import os
+import time
+
 import paramiko
+import pexpect
+
 import interactive
-import server_group
-import os, time
 import mysql_base
+import server_group
 
 
 class Action(object):
