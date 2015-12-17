@@ -109,6 +109,7 @@ class SSHConnection(object):
 
 
 if __name__ == '__main__':
+    subprocess.call('clear', shell=True)
     try:
         try:
             import paramiko
