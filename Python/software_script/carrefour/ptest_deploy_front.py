@@ -129,7 +129,7 @@ if __name__ == '__main__':
             description="eg: '%(prog)s' -c tomcat-front|tomcat -d {start|stop|status|restart|log|deploy}")
     # ADD Tomcat Apps ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     parser.add_argument('-c', '--app_name', nargs='+', dest='choices',
-                        choices=('tomcat-front', 'tomcat-mobile'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
+                        choices=('tomcat-front', 'tomcat-backend'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
     parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', default='log',
                         help='Input One of the {start|stop|status|restart|log|deploy}')  # nargs='?' 有一个货没有参数都可以
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
