@@ -11,21 +11,22 @@ import os
 import argparse
 import contextlib
 import zipfile
+import httplib
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Tomcat(object):
     def __init__(self, tomcat_exe):
-        self.tomcat_exe = tomcat_exe
-        self.Tomcat_Home = "/software/%s" % tomcat_exe
-        self.Tomcat_Log_Home = "/software/%s/logs" % tomcat_exe
+        self.tomcat_exe = "tomcat-" + tomcat_exe
+        self.Tomcat_Home = "/software/%s" % self.tomcat_exe
+        self.Tomcat_Log_Home = "/software/%s/logs" % self.tomcat_exe
         self.counnt = 10
         # deploy options
         self.timeStr = time.strftime("%Y-%m-%d-%H:%M")
         self.source_files = "/software/cybershop-web-0.0.1-SNAPSHOT.war"
         self.dest_dir = "/software/upload_project/%s-%s" % (
             self.timeStr, self.source_files.split('/')[2].split('.war')[0])
-        self.dest_deploy_dir = "/software/deploy-web/%s" % self.source_files.split('/')[2].split('.war')[0]
+        self.dest_deploy_dir = "/software/deploy-backend/%s" % self.source_files.split('/')[2].split('.war')[0]
         self.images_Home = "/software/newupload1"
         self.static_images_lins = "%s/assets/upload" % self.dest_dir
         # deploy options --->end
@@ -88,6 +89,14 @@ class Tomcat(object):
         except KeyboardInterrupt:
             print 'ctrl+d or z'
 
+    def get_status_code(self, host, path="/"):
+        try:
+            conn = httplib.HTTPConnection(host)
+            conn.request("HEAD", path)
+            return conn.getresponse().status
+        except StandardError:
+            return None
+
     # Unzip Project_name~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def unzip(self):
         ret = 0
@@ -103,29 +112,27 @@ class Tomcat(object):
         except IOError:
             print "\033[31m%s Is Not Exists Please send Files\033[0m" % self.source_files
         return ret
+
     # Create Soft Links
     def soft_link(self):
         if os.path.islink(self.dest_deploy_dir):
             os.unlink(self.dest_deploy_dir)
             print "\033[32mCreating Static Files/Images Link\033[0m "
             os.symlink(self.images_Home, self.static_images_lins)
-            print self.dest_dir
-            print self.dest_deploy_dir
             os.symlink(self.dest_dir, self.dest_deploy_dir)
         else:
             print "\033[32mCreating Static Files/Images Link\033[0m "
             os.symlink(self.images_Home, self.static_images_lins)
-            print self.dest_dir
-            print self.dest_deploy_dir
             os.symlink(self.dest_dir, self.dest_deploy_dir)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description="eg: '%(prog)s' -c tomcat-front|tomcat -d {start|stop|status|restart|log|deploy}")
+            description="~~~~~~~~~~~~~~~ 此脚本部署 carrefour-ptest(预热环境后台部署)"
+                        "EG: '%(prog)s' -c backend -d start|stop|restart|status|log|deploy")
     # ADD Tomcat Apps ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     parser.add_argument('-c', '--app_name', nargs='+', dest='choices',
-                        choices=('front', 'backend'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
+                        choices=('api', 'backend'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
     parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', default='log',
                         help='Input One of the {start|stop|status|restart|log|deploy}')  # nargs='?' 有一个货没有参数都可以
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
@@ -154,6 +161,11 @@ if __name__ == '__main__':
             elif args.handle == 'status':
                 if Handle.get_tomcat_pid() is not None:
                     print "\033[32m %s Is Running is PID:\033[0m" % Handle.tomcat_exe + "\033[31m %s \033[0m" % Handle.get_tomcat_pid()
+                    web_return_code = Handle.get_status_code(host='10.151.255.10:8090', path='/login')
+                    if web_return_code != 200:
+                        print "\033[32m %s Process Is Exist But Service Is unavailable\033[0m" % Handle.tomcat_exe + "\033[31m WEB_Return_Code:%s\033[0m" % web_return_code
+                    else:
+                        print "\033[32m %s Process Is Exist Service Is available Return Code:\033[0m" % Handle.tomcat_exe + "\033[31m%s\033[0m" % web_return_code + "\033[32mCheck URL:http://10.151.255.10:8090/login\033[0m"
                 else:
                     print "\033[32m %s Not Running Or Not Exist \033[0m" % Handle.tomcat_exe
             else:

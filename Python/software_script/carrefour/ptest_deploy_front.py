@@ -16,9 +16,9 @@ import zipfile
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Tomcat(object):
     def __init__(self, tomcat_exe):
-        self.tomcat_exe = tomcat_exe
-        self.Tomcat_Home = "/software/%s" % tomcat_exe
-        self.Tomcat_Log_Home = "/software/%s/logs" % tomcat_exe
+        self.tomcat_exe = "tomcat-" + tomcat_exe
+        self.Tomcat_Home = "/software/%s" % self.tomcat_exe
+        self.Tomcat_Log_Home = "/software/%s/logs" % self.tomcat_exe
         self.counnt = 10
         # deploy options
         self.timeStr = time.strftime("%Y-%m-%d-%H:%M")
@@ -105,6 +105,7 @@ class Tomcat(object):
         except IOError:
             print "\033[31m%s Is Not Exists Please send Files\033[0m" % self.source_files
         return ret
+
     # Create Soft Links
     def soft_link(self):
         if os.path.islink(self.dest_deploy_dir):
@@ -112,24 +113,21 @@ class Tomcat(object):
             print "\033[32mCreating Static Files/Images Link\033[0m "
             os.symlink(self.images_Home, self.static_images_lins)
             os.symlink(self.static_Home, self.static_home_link)
-            print self.dest_dir
-            print self.dest_deploy_dir
             os.symlink(self.dest_dir, self.dest_deploy_dir)
         else:
             print "\033[32mCreating Static Files/Images Link\033[0m "
             os.symlink(self.images_Home, self.static_images_lins)
             os.symlink(self.static_Home, self.static_home_link)
-            print self.dest_dir
-            print self.dest_deploy_dir
             os.symlink(self.dest_dir, self.dest_deploy_dir)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description="eg: '%(prog)s' -c tomcat-front|tomcat -d {start|stop|status|restart|log|deploy}")
+            description="~~~~~~~~~~~~~~~ 此脚本部署 carrefour-ptest(预热环境后台部署)"
+                        "EG: '%(prog)s' -c backend -d start|stop|restart|status|log|deploy")
     # ADD Tomcat Apps ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     parser.add_argument('-c', '--app_name', nargs='+', dest='choices',
-                        choices=('tomcat-front', 'tomcat-backend'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
+                        choices=('front', 'None'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
     parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', default='log',
                         help='Input One of the {start|stop|status|restart|log|deploy}')  # nargs='?' 有一个货没有参数都可以
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')

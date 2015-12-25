@@ -29,15 +29,6 @@ class SSHConnection(object):
             self.sftp = paramiko.SFTPClient.from_transport(self.transport)
             self.sftp_open = True
 
-    # ----------------------------------------------------------------------
-    def get(self, remote_path, local_path=None):
-        """
-        Copies a file from the remote host to the local host.
-        """
-        self._openSFTPConnection()
-        self.sftp.get(remote_path, local_path)
-
-        # ----------------------------------------------------------------------
 
     def put(self, local_path, remote_path=None):
         """
@@ -84,14 +75,17 @@ class Run_Cmd(object):
 
 if __name__ == "__main__":
     username = "root"
-    pw = "aarongo"
+    pw = "comall2014"
     parser = argparse.ArgumentParser(
             description="eg: '%(prog)s' -h ipaddress -d {front|web}")
     # ADD Tomcat Apps ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    parser.add_argument('-h', '--deploy_ipaddress', nargs='+', dest='choices',
-                        choices=('10.90.0.200', '10.90.0.201'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
-    parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', default='log',
-                        choices=('front', 'web'), help='Input One of the {front|web}')  # nargs='?' 有一个货没有参数都可以
+    parser.add_argument('-p', '--deploy_ipaddress', nargs='+', dest='choices',
+                        choices=('10.90.0.244', '10.90.10.245'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
+    parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', choices=('front', 'web'),
+                        help='Input One of the {front|web}')  # nargs='?' 有一个货没有参数都可以
+    parser.add_argument('-t', '--action', action='store', nargs='+', dest='parameter',
+                        choices=('log', 'start', 'stop', 'status', 'restart'),
+                        help='operating Tomcat log|start|stop|status|restart')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
 
     args = parser.parse_args()
@@ -102,18 +96,18 @@ if __name__ == "__main__":
             send_files = SSHConnection(args.choices[0], username, pw)
             remote_script = Run_Cmd()
             if args.handle == 'front':
-                source_files = '/software/cybershop-front-0.0.1-SNAPSHOT.war'
-                dest_files = '/software/cybershop-front-0.0.1-SNAPSHOT.war'
-                send_files.put(source_files, dest_files)
+                # source_files = '/software/cybershop-front-0.0.1-SNAPSHOT.war'
+                # dest_files = '/software/cybershop-front-0.0.1-SNAPSHOT.war'
+                # send_files.put(source_files, dest_files)
                 send_files.close()
-                command = "./deploy_front.py -c tomcat-front -d deploy"
+                command = "/root/deploy_front.py -c front -d deploy"
                 remote_script.Run(hostname=args.choices[0], username=username, password=pw, command=command)
             if args.handle == 'web':
                 source_files = '/software/cybershop-web-0.0.1-SNAPSHOT.war'
                 dest_files = '/software/cybershop-web-0.0.1-SNAPSHOT.war'
                 send_files.put(source_files, dest_files)
                 send_files.close()
-                command = "./deploy_backend.py -c tomcat-backend -d deploy"
+                command = "/root/deploy_backend.py -c backend -d deploy"
                 remote_script.Run(hostname=args.choices[0], username=username, password=pw, command=command)
         except TypeError:
             parser.print_help()
