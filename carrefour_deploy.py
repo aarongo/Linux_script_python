@@ -29,7 +29,6 @@ class SSHConnection(object):
             self.sftp = paramiko.SFTPClient.from_transport(self.transport)
             self.sftp_open = True
 
-
     def put(self, local_path, remote_path=None):
         """
         Copies a file from the local host to the remote host
@@ -74,40 +73,86 @@ class Run_Cmd(object):
 
 
 if __name__ == "__main__":
-    username = "root"
-    pw = "comall2014"
+    username = "cdczhangg"
+    pw = "76132fbbe6"
     parser = argparse.ArgumentParser(
             description="eg: '%(prog)s' -h ipaddress -d {front|web}")
     # ADD Tomcat Apps ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    parser.add_argument('-p', '--deploy_ipaddress', nargs='+', dest='choices',
-                        choices=('10.90.0.244', '10.90.10.245'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
-    parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', choices=('front', 'web'),
-                        help='Input One of the {front|web}')  # nargs='?' 有一个货没有参数都可以
-    parser.add_argument('-t', '--action', action='store', nargs='+', dest='parameter',
-                        choices=('log', 'start', 'stop', 'status', 'restart'),
+    parser.add_argument('-t', '--Handle', action='store', nargs='?', dest='handle', choices=('app', 'weixin'),
+                        help='Input One of the {app|weixin}')  # nargs='?' 有一个货没有参数都可以
+    parser.add_argument('-d', '--Handle1', action='store', nargs='+', dest='handle1',
+                        choices=('log', 'start', 'stop', 'status', 'restart', 'deploy'),
                         help='operating Tomcat log|start|stop|status|restart')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
 
     args = parser.parse_args()
+    app_addr_list = ['10.151.254.3', '10.151.254.11']
+    weixin_addr_list = ['10.151.254.14', '10.151.254.15']
     if len(sys.argv) <= 3:
         parser.print_help()
     else:
         try:
-            send_files = SSHConnection(args.choices[0], username, pw)
             remote_script = Run_Cmd()
-            if args.handle == 'front':
-                # source_files = '/software/cybershop-front-0.0.1-SNAPSHOT.war'
-                # dest_files = '/software/cybershop-front-0.0.1-SNAPSHOT.war'
-                # send_files.put(source_files, dest_files)
-                send_files.close()
-                command = "/root/deploy_front.py -c front -d deploy"
-                remote_script.Run(hostname=args.choices[0], username=username, password=pw, command=command)
-            if args.handle == 'web':
-                source_files = '/software/cybershop-web-0.0.1-SNAPSHOT.war'
-                dest_files = '/software/cybershop-web-0.0.1-SNAPSHOT.war'
-                send_files.put(source_files, dest_files)
-                send_files.close()
-                command = "/root/deploy_backend.py -c backend -d deploy"
-                remote_script.Run(hostname=args.choices[0], username=username, password=pw, command=command)
+            if args.handle == 'weixin':
+                if args.handle1[0] == 'deploy':
+                    source_files = '/software/mobile_war/cybershop-mobile-0.0.1-SNAPSHOT.war'
+                    dest_files = '/software/cybershop-mobile-0.0.1-SNAPSHOT.war'
+                    command = "/software/script/carrefour_wechat.py -c mobile -d deploy"
+                    for ip in weixin_addr_list:
+                        print "\033[32mDeploy Weixin Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        send_files = SSHConnection(ip, username, pw)
+                        send_files.put(source_files, dest_files)
+                        send_files.close()
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'status':
+                    command = "/software/script/carrefour_wechat.py -c mobile -d status"
+                    for ip in weixin_addr_list:
+                        print "\033[32mWeixin Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'start':
+                    command = "/software/script/carrefour_wechat.py -c mobile -d start"
+                    for ip in weixin_addr_list:
+                        print "\033[32mWeixin Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'stop':
+                    command = "/software/script/carrefour_wechat.py -c mobile -d stop"
+                    for ip in weixin_addr_list:
+                        print "\033[32mWeixin Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'restart':
+                    command = "/software/script/carrefour_wechat.py -c mobile -d restart"
+                    for ip in weixin_addr_list:
+                        print "\033[32mWeixin Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+            if args.handle == 'app':
+                if args.handle1[0] == 'deploy':
+                    source_files = '/software/mobile_war/cybershop-mobile-0.0.1-SNAPSHOT.war'
+                    dest_files = '/software/cybershop-mobile-0.0.1-SNAPSHOT.war'
+                    command = "/software/script/carrefour_app.py -c mobile -d deploy"
+                    for ip in app_addr_list:
+                        send_files = SSHConnection(ip, username, pw)
+                        send_files.put(source_files, dest_files)
+                        send_files.close()
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'status':
+                    command = "/software/script/carrefour_app.py -c mobile -d status"
+                    for ip in app_addr_list:
+                        print "\033[32mAPP Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'start':
+                    command = "/software/script/carrefour_app.py -c mobile -d start"
+                    for ip in app_addr_list:
+                        print "\033[32mAPP Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'stop':
+                    command = "/software/script/carrefour_app.py -c mobile -d stop"
+                    for ip in app_addr_list:
+                        print "\033[32mAPP Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
+                if args.handle1[0] == 'restart':
+                    command = "/software/script/carrefour_app.py -c mobile -d restart"
+                    for ip in app_addr_list:
+                        print "\033[32mAPP Ipaddress:\033[0m" + "\033[31m%s\033[0m" % ip
+                        remote_script.Run(hostname=ip, username=username, password=pw, command=command)
         except TypeError:
             parser.print_help()
