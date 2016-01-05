@@ -4,7 +4,7 @@
 # Author-Email: lonnyliu@126.com
 
 
-# Import libary~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Import libary~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import subprocess
 import time
 import sys
@@ -21,16 +21,16 @@ import socket
 class Tomcat(object):
     def __init__(self, tomcat_exe):
         self.tomcat_exe = "tomcat-" + tomcat_exe
-        self.Tomcat_Home = "/software/%s" % self.tomcat_exe
-        self.Tomcat_Log_Home = "/software/%s/logs" % self.tomcat_exe
+        self.Tomcat_Home = "/install/%s" % self.tomcat_exe
+        self.Tomcat_Log_Home = "/install/%s/logs" % self.tomcat_exe
         self.counnt = 10
         # deploy options
         self.timeStr = time.strftime("%Y-%m-%d-%H:%M")
         self.source_files = "/software/cybershop-mobile-0.0.1-SNAPSHOT.war"
         self.dest_dir = "/software/upload_project/%s-%s" % (
             self.timeStr, self.source_files.split('/')[2].split('.war')[0])
-        self.dest_deploy_dir = "/software/deploy-mobile/%s" % self.source_files.split('/')[2].split('.war')[0]
-        self.images_Home = "/software/newupload"
+        self.dest_deploy_dir = "/install/deploy-mobile/%s" % self.source_files.split('/')[2].split('.war')[0]
+        self.images_Home = "/install/upload"
         self.static_assets = "%s/assets" % self.dest_dir
         self.static_images_lins = "%s/assets/upload" % self.dest_dir
         # deploy options --->end
@@ -49,6 +49,8 @@ class Tomcat(object):
 
     # Start Tomcat Process~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def start_tomcat(self):
+        os.environ["JAVA_HOME"] = "/install/jdk1.7"
+        os.environ["JRE_HOME"] = "/install/jdk1.7/jre"
         if self.get_tomcat_pid() is not None:
             print "#" * 40
             print "\033[32m %s Is Started \033[0m" % self.tomcat_exe
@@ -147,58 +149,53 @@ if __name__ == '__main__':
             description="~~~~~~~~~~~~~~~ 此脚本部署 carrefour-ptest(生成环境手机节点部署)"
                         "EG: '%(prog)s' -c mobile -d start|stop|restart|status|log|deploy")
     # ADD Tomcat Apps ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    parser.add_argument('-c', '--app_name', nargs='+', dest='choices',
-                        choices=('mobile', 'None'))  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
-    parser.add_argument('-d', '--Handle', action='store', nargs='?', dest='handle', default='log',
+    parser.add_argument('-c', '--app_name', choices=('mobile', 'None'),default='mobile')  # choices 规定只能书写此处标出的, nargs='+' 至少有一个参数
+    parser.add_argument('-d', '--handle', default='log',
                         help='Input One of the {start|stop|status|restart|log|deploy}')  # nargs='?' 有一个货没有参数都可以
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
 
     args = parser.parse_args()
-    if len(sys.argv) <= 4:
-        parser.print_help()
-    else:
-        try:
-            Handle = Tomcat(args.choices[0])
-            if args.handle == 'log':
-                Handle.tomcat_log()
-            elif args.handle == 'start':
-                Handle.start_tomcat()
-            elif args.handle == 'stop':
-                Handle.stop_tomcat()
-            elif args.handle == 'restart':
-                Handle.stop_tomcat()
-                time.sleep(5)
-                Handle.start_tomcat()
-            elif args.handle == 'deploy':
-                Handle.stop_tomcat()
-                if Handle.unzip() != 0:
-                    Handle.soft_link()
-                Handle.start_tomcat()
-                print "\033[31mWaiting backend Started SuccessFul!!!.......\033[0m"
-                while True:
-                    ipaddress_port = socket.gethostbyname(socket.gethostname()) + ":8080"
-                    mobile_return_code = Handle.get_status_code(host=ipaddress_port, path='/mobile/api/user/login')
-                    if mobile_return_code == 200:
-                        print "\033[32m %s Process Is Exist Service Is available Return Code:\033[0m" % Handle.tomcat_exe + "\033[31m%s\033[0m" % mobile_return_code + "\033[32mCheck URL:http://%s:8080/mobile/api/user/login\033[0m" % socket.gethostbyname(
-                                socket.gethostname())
-                        break
-            elif args.handle == 'status':
-                if Handle.get_tomcat_pid() is not None:
-                    ipaddress_port = socket.gethostbyname(socket.gethostname()) + ":8080"
-                    mobile_return_code = Handle.get_status_code(host=ipaddress_port, path='/mobile/api/user/login')
-                    print "#" * 40
-                    print "\033[32m %s Is Running is PID:\033[0m" % Handle.tomcat_exe + "\033[31m %s \033[0m" % Handle.get_tomcat_pid()
-                    if mobile_return_code == 200:
-                        print "\033[32m %s Process Is Exist Service Is available Return Code:\033[0m" % Handle.tomcat_exe + "\033[31m%s\033[0m" % mobile_return_code + "\033[32mCheck URL:http://%s:8080/mobile/api/user/login\033[0m" % socket.gethostbyname(
-                                socket.gethostname())
-                    else:
-                        print "\033[32mProcess Is Exist Service Is Not available\033[0m"
-                    print "#" * 40
+    try:
+        Handle = Tomcat(args.app_name)
+        if args.handle == 'log':
+            Handle.tomcat_log()
+        elif args.handle == 'start':
+            Handle.start_tomcat()
+        elif args.handle == 'stop':
+            Handle.stop_tomcat()
+        elif args.handle == 'restart':
+            Handle.stop_tomcat()
+            time.sleep(5)
+            Handle.start_tomcat()
+        elif args.handle == 'deploy':
+            Handle.stop_tomcat()
+            if Handle.unzip() != 0:
+                Handle.soft_link()
+            Handle.start_tomcat()
+            print "\033[31mWaiting mobile Started SuccessFul!!!.......\033[0m"
+            while True:
+                ipaddress_port = socket.gethostbyname(socket.gethostname()) + ":8090"
+                mobile_return_code = Handle.get_status_code(host=ipaddress_port, path='/mobile/api/user/login')
+                if mobile_return_code == 200:
+                    print "\033[32m %s Process Is Exist Service Is available Return Code:\033[0m" % Handle.tomcat_exe + "\033[31m%s\033[0m" % mobile_return_code + "\033[32mCheck URL:http://%s/mobile/api/user/login\033[0m" % ipaddress_port
+                    break
+        elif args.handle == 'status':
+            if Handle.get_tomcat_pid() is not None:
+                ipaddress_port = socket.gethostbyname(socket.gethostname()) + ":8090"
+                mobile_return_code = Handle.get_status_code(host=ipaddress_port, path='/mobile/api/user/login')
+                print "#" * 40
+                print "\033[32m %s Is Running is PID:\033[0m" % Handle.tomcat_exe + "\033[31m %s \033[0m" % Handle.get_tomcat_pid()
+                if mobile_return_code == 200:
+                    print "\033[32m %s Process Is Exist Service Is available Return Code:\033[0m" % Handle.tomcat_exe + "\033[31m%s\033[0m" % mobile_return_code + "\033[32mCheck URL:http://%s/mobile/api/user/login\033[0m" % ipaddress_port
                 else:
-                    print "#" * 40
-                    print "\033[32m %s Not Running Or Not Exist \033[0m" % Handle.tomcat_exe
-                    print "#" * 40
+                    print "\033[32mProcess Is Exist Service Is Not available\033[0m"
+                print "#" * 40
             else:
-                print "\033[31mYou Input parameter Is Not Exist\033[0m"
-        except TypeError:
-            parser.print_help()
+                print "#" * 40
+                print "\033[32m %s Not Running Or Not Exist \033[0m" % Handle.tomcat_exe
+                print "#" * 40
+        else:
+            print "\033[31mYou Input parameter Is Not Exist\033[0m"
+    except TypeError:
+        parser.print_help()
+
